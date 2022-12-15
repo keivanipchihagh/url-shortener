@@ -41,10 +41,13 @@ func toSha256(input string, salt []byte) []byte {
 	return algorithm.Sum(salt)
 }
 
+// Generate a short link from the original URL
 func GenerateShortLink(originalUrl string) string {
 	salt := generateSalt()
 	urlHashBytes := toSha256(originalUrl, salt)
 	generatedNumber := new(big.Int).SetBytes(urlHashBytes).Uint64()
 	finalString := base58Encoded([]byte(fmt.Sprintf("%d", generatedNumber)))
+
+	// Return the first 8 characters of the generated string
 	return finalString[:8]
 }
