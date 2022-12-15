@@ -14,5 +14,9 @@
 # Environment variables
 *.env
 
+# Data files
+redis-data
+redis.conf
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
