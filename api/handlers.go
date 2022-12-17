@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/keivanipchihagh/url-shortener/internal/redis"
+	"github.com/keivanipchihagh/url-shortener/internal/postgres"
 	"github.com/keivanipchihagh/url-shortener/internal/shortener"
 )
 
@@ -25,7 +25,7 @@ func CreateShortUrl(c *gin.Context) {
 
 	// Generate a short link and store it in Redis
 	shortUrl := shortener.GenerateShortLink(creationRequest.LongUrl)
-	redis.StoreUrlMapping(shortUrl, creationRequest.LongUrl)
+	postgres.StoreUrlMapping(shortUrl, creationRequest.LongUrl)
 
 	host := "http://localhost:9808/"
 	c.JSON(http.StatusOK, gin.H{
@@ -36,6 +36,6 @@ func CreateShortUrl(c *gin.Context) {
 // Redirects the user to the initial URL
 func HandleShortUrlRedirect(c *gin.Context) {
 	shortUrl := c.Param("shortUrl")
-	initialUrl := redis.RetrieveOriginalUrl(shortUrl)
+	initialUrl := postgres.RetrieveOriginalUrl(shortUrl)
 	c.Redirect(302, initialUrl)
 }
