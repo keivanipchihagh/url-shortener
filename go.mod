@@ -8,6 +8,8 @@ require (
 	github.com/itchyny/base58-go v0.2.0
 )
 
+require github.com/lib/pq v1.10.7 // indirect
+
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
