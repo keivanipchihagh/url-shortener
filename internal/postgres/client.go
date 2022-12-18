@@ -48,29 +48,31 @@ func openConnection() *sql.DB {
 	return db
 }
 
-// Retrive original URL given the short URL
-func RetrieveOriginalUrl(shortUrl string) string {
+// Retrive original URL given the hash
+func RetrieveOriginalUrl(hash string) string {
 	db := openConnection()
 	defer db.Close()
 
 	// Query the database
-	rows, err := db.Query("SELECT original FROM urls WHERE short_url = $1", shortUrl)
+	rows, err := db.Query("SELECT url FROM urls WHERE hash = $1", hash)
 	checkError(err)
 
 	// Read URL
 	var originalUrl string
-	err = rows.Scan(&originalUrl)
-	checkError(err)
-
-	return originalUrl
+	for rows.Next() {
+		err = rows.Scan(&originalUrl)
+		checkError(err)
+		return originalUrl
+	}
+	return ""
 }
 
-// Store the mapping of the short URL to the original URL in Postgres
-func StoreUrlMapping(shortUrl string, originalUrl string) {
+// Store the mapping of the hash to the original URL in Postgres
+func StoreUrlMapping(hash string, originalUrl string) {
 	db := openConnection()
 	defer db.Close()
 
 	// Insert the URL mapping into the database
-	_, err := db.Exec("INSERT INTO urls (short_url, original) VALUES ($1, $2)", shortUrl, originalUrl)
+	_, err := db.Exec("INSERT INTO urls (hash, url) VALUES ($1, $2)", hash, originalUrl)
 	checkError(err)
 }

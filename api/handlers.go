@@ -10,32 +10,43 @@ import (
 
 // Request model definition
 type UrlCreationRequest struct {
-	LongUrl string `json:"long_url" binding:"required"`
+	Url        string `json:"url" binding:"required"`
+	HashLength int    `json:"hash_length" binding:"required"`
 }
 
-// Creates a short URL, stores it in Redis and returns the result as JSON
-func CreateShortUrl(c *gin.Context) {
+// Creates a hash, stores in database and returns the response as JSON (keys: url, hash)
+func CreateHash(c *gin.Context) {
 	var creationRequest UrlCreationRequest
 
-	// Vadlidate the request body
+	// Parse and validate the request body
 	if err := c.ShouldBindJSON(&creationRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Generate a short link and store it in Redis
-	shortUrl := shortener.GenerateShortLink(creationRequest.LongUrl)
-	postgres.StoreUrlMapping(shortUrl, creationRequest.LongUrl)
+	// Generate a short link and store it in the database
+	hash := shortener.GenerateHash(creationRequest.Url, creationRequest.HashLength)
+	postgres.StoreUrlMapping(hash, creationRequest.Url)
 
-	host := "http://localhost:9808/"
 	c.JSON(http.StatusOK, gin.H{
-		"short_url": host + shortUrl,
+		"url":  creationRequest.Url,
+		"hash": hash,
 	})
 }
 
-// Redirects the user to the initial URL
-func HandleShortUrlRedirect(c *gin.Context) {
-	shortUrl := c.Param("shortUrl")
-	initialUrl := postgres.RetrieveOriginalUrl(shortUrl)
-	c.Redirect(302, initialUrl)
+// Retrieves the original URL from database and returns the response as JSON (keus: url, hash)
+func GetUrl(c *gin.Context) {
+	// hash, err := c.Params.Get("hash")
+	hash, err := c.GetQuery("hash")
+	if !err {
+		c.JSON(http.StatusNotFound, http.NotFoundHandler())
+		return
+	}
+
+	url := postgres.RetrieveOriginalUrl(hash)
+
+	c.JSON(http.StatusOK, gin.H{
+		"url":  url,
+		"hash": hash,
+	})
 }

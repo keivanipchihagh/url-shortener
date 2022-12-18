@@ -8,15 +8,10 @@ import (
 
 var router = gin.Default()
 
+// Registers the routes
 func RegisterRoutes() {
-
-	router.POST("/shorten", func(c *gin.Context) {
-		CreateShortUrl(c)
-	})
-
-	router.GET("/:shortUrl", func(c *gin.Context) {
-		HandleShortUrlRedirect(c)
-	})
+	router.POST("/set", func(c *gin.Context) { CreateHash(c) })
+	router.GET("/get", func(c *gin.Context) { GetUrl(c) })
 }
 
 // Starts the web server
